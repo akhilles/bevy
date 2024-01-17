@@ -54,6 +54,9 @@ use winit::{
     event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopWindowTarget},
 };
 
+#[cfg(target_arch = "wasm32")]
+use winit::platform::web::EventLoopExtWebSys;
+
 use crate::accessibility::{AccessKitAdapters, AccessibilityPlugin, WinitActionHandlers};
 
 use crate::converters::convert_winit_theme;
@@ -232,6 +235,10 @@ fn run<F, T>(event_loop: EventLoop<T>, event_handler: F) -> !
 where
     F: 'static + FnMut(Event<'_, T>, &EventLoopWindowTarget<T>, &mut ControlFlow),
 {
+    #[cfg(target_arch = "wasm32")]
+    event_loop.spawn(event_handler);
+
+    #[cfg(not(target_arch = "wasm32"))]
     event_loop.run(event_handler)
 }
 
