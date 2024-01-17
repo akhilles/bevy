@@ -50,6 +50,9 @@ use winit::{
     event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopWindowTarget},
 };
 
+#[cfg(target_arch = "wasm32")]
+use winit::platform::web::EventLoopExtWebSys;
+
 use crate::accessibility::{AccessKitAdapters, AccessKitPlugin, WinitActionHandlers};
 
 use crate::converters::convert_winit_theme;
@@ -827,7 +830,11 @@ pub fn winit_runner(mut app: App) {
     };
 
     trace!("starting winit event loop");
-    // TODO(clean): the winit docs mention using `spawn` instead of `run` on WASM.
+
+    #[cfg(target_arch = "wasm32")]
+    event_loop.spawn(event_handler);
+
+    #[cfg(not(target_arch = "wasm32"))]
     if let Err(err) = event_loop.run(event_handler) {
         error!("winit event loop returned an error: {err}");
     }
